@@ -7,34 +7,64 @@
 //
 
 import UIKit
+import AVFoundation
+import Charts
 
-
-class ViewController: UIViewController {
-
-    @IBOutlet weak var re: UILabel!
-    @IBOutlet weak var logging: UILabel!
-    @IBOutlet weak var STIdisplay: UILabel!
+class ViewController: UIViewController, ChartViewDelegate {
+    var MyRecorder = RecordAudio()
     
-    @IBOutlet weak var loggingswitch: UISwitch!
-    @IBOutlet weak var recordbutton: UIButton!
-    @IBAction func recbuttonclicked(_ sender: Any) {
-        STIdisplay.text = "clicked!"
+    @IBOutlet weak var RecordButtonLabel: UILabel!
+    @IBOutlet weak var LoggingLabel: UILabel!
+    @IBOutlet weak var STIDisplayLabel: UILabel!
+    @IBOutlet weak var RecordButton: UIButton!
+    @IBOutlet weak var LoggingSwitch: UISwitch!
+    @IBOutlet weak var IRPlot: LineChartView!
+    
+    
+    @IBAction func clickedRecordButton(_ sender: Any) {
+        if MyRecorder.isRecording {
+            MyRecorder.stopRecording()
+            var LineDataEntry: [ChartDataEntry] = []
+            for i in 0..<MyRecorder.MonoBuffer.count{
+                let dataPoint = ChartDataEntry(x: Double(i), y: Double(MyRecorder.MonoBuffer[i]))
+                LineDataEntry.append(dataPoint)
+            }
+            let chartDataset = LineChartDataSet(values: LineDataEntry, label: "IR")
+            chartDataset.colors = [NSUIColor.red]
+            chartDataset.lineWidth = 1.0
+            let chartData = LineChartData()
+            chartData.addDataSet(chartDataset)
+            IRPlot.data = chartData
+//            IRPlot.xAxis.labelCount = MyRecorder.MonoBuffer.count
+            IRPlot.backgroundColor = NSUIColor.darkGray
+            IRPlot.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
+//            IRPlot.reloadInputViews()
+            
+//            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: Int(MyRecorder.sampleRate))
+//            STIDisplayLabel.text = NSString(format: "STI: %f" , result) as String
+            STIDisplayLabel.text = "Record end"
+        }else{
+            STIDisplayLabel.text = "Recording..."
+            MyRecorder.startRecording()
+        }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        IRPlot.delegate = self
+        IRPlot.noDataText = "IR will be drawn here"
+        IRPlot.noDataTextColor = NSUIColor.blue
         // Do any additional setup after loading the view, typically from a nib.
         let height = UIScreen.main.fixedCoordinateSpace.bounds.height
         let width = UIScreen.main.fixedCoordinateSpace.bounds.width
-
-        //recordbutton.center = CGPoint(x:(width/2),y:(height/2))
-        //recordbutton.frame = CGRect(x: 200, y: 200, width: 60, height: 60)
-        recordbutton.frame.size = CGSize(width: 60, height: 60);
-        recordbutton.center = CGPoint(x: width/2, y: height * 0.25)
         
-        let imageSize:CGSize = CGSize(width: width * 0.2, height: width * 0.2)
-        recordbutton.imageView?.contentMode = .scaleAspectFit
-        recordbutton.imageEdgeInsets = UIEdgeInsetsMake(recordbutton.frame.size.height/2 - imageSize.height/2, recordbutton.frame.size.width/2 - imageSize.width/2, recordbutton.frame.size.height/2 - imageSize.height/2, recordbutton.frame.size.width/2 - imageSize.width/2)
+
+//        RecordButton.frame.size = CGSize(width: 60, height: 60);
+//        RecordButton.center = CGPoint(x: width/2, y: height * 0.25)
+//        
+//        let imageSize:CGSize = CGSize(width: width * 0.2, height: width * 0.2)
+//        RecordButton.imageView?.contentMode = .scaleAspectFit
+//        RecordButton.imageEdgeInsets = UIEdgeInsetsMake(RecordButton.frame.size.height/2 - imageSize.height/2, RecordButton.frame.size.width/2 - imageSize.width/2, RecordButton.frame.size.height/2 - imageSize.height/2, RecordButton.frame.size.width/2 - imageSize.width/2)
     }
 
     
