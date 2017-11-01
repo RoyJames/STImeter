@@ -25,18 +25,34 @@ class ViewController: UIViewController, ChartViewDelegate {
         if MyRecorder.isRecording {
             MyRecorder.stopRecording()
             var LineDataEntry: [ChartDataEntry] = []
-            for i in 0..<MyRecorder.MonoBuffer.count{
-                let dataPoint = ChartDataEntry(x: Double(i), y: Double(MyRecorder.MonoBuffer[i]))
+            let drawSample = 1000
+            let spacing = MyRecorder.MonoBuffer.count / 1000
+            for i in 0..<drawSample{
+                let dataPoint = ChartDataEntry(x: Double(i), y: Double(MyRecorder.MonoBuffer[i * spacing]))
                 LineDataEntry.append(dataPoint)
             }
             let chartDataset = LineChartDataSet(values: LineDataEntry, label: "IR")
             chartDataset.colors = [NSUIColor.red]
             chartDataset.lineWidth = 1.0
+            chartDataset.drawCircleHoleEnabled = false
+            chartDataset.drawCirclesEnabled = false
+
             let chartData = LineChartData()
             chartData.addDataSet(chartDataset)
             IRPlot.data = chartData
+            IRPlot.setVisibleYRange(minYRange: chartDataset.yMin, maxYRange: chartDataset.yMax, axis: chartDataset.axisDependency)
+            IRPlot.setVisibleXRange(minXRange: chartDataset.xMin, maxXRange: chartDataset.xMax)
+            IRPlot.drawGridBackgroundEnabled = false
+            IRPlot.xAxis.drawAxisLineEnabled = false
+            IRPlot.xAxis.drawGridLinesEnabled = false
+            IRPlot.xAxis.drawLabelsEnabled = false
+            IRPlot.drawBordersEnabled = false
+            IRPlot.leftAxis.enabled = false
+            IRPlot.rightAxis.enabled = false
+            IRPlot.legend.enabled = false
+            IRPlot.chartDescription?.text = "Impulse Response"
 //            IRPlot.xAxis.labelCount = MyRecorder.MonoBuffer.count
-            IRPlot.backgroundColor = NSUIColor.darkGray
+//            IRPlot.backgroundColor = NSUIColor.darkGray
             IRPlot.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
 //            IRPlot.reloadInputViews()
             
