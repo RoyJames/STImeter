@@ -10,6 +10,7 @@
 //  Copyright © 2017 HotPaw Productions. All rights reserved.
 //  Distribution: BSD 2-clause license
 //
+//  Modified by Zhenyu Tang on 11/01/2017.
 
 import Foundation
 import AVFoundation

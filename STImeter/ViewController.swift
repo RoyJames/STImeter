@@ -20,7 +20,6 @@ class ViewController: UIViewController, ChartViewDelegate {
     @IBOutlet weak var LoggingSwitch: UISwitch!
     @IBOutlet weak var IRPlot: LineChartView!
     
-    
     @IBAction func clickedRecordButton(_ sender: Any) {
         if MyRecorder.isRecording {
             MyRecorder.stopRecording()
