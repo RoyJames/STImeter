@@ -58,10 +58,36 @@ class ViewController: UIViewController, ChartViewDelegate {
 //            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: Int(MyRecorder.sampleRate))
 //            STIDisplayLabel.text = NSString(format: "STI: %f" , result) as String
             STIDisplayLabel.text = "Record end"
+            // now log the output if user wishes
+            if(LoggingSwitch.isOn){
+                handleLogging()
+            }
         }else{
             STIDisplayLabel.text = "Recording..."
             MyRecorder.startRecording()
         }
+    }
+    
+    func handleLogging(){
+        let logPrompt = UIAlertController(title: "Log?", message: "Would you like to log this result?", preferredStyle: .alert)
+        let yesAction = UIAlertAction(title:"Yes", style: .destructive){ (alert: UIAlertAction!) -> Void in
+            let enterTag = UIAlertController(title: "Enter Tag", message: "Please enter a tag for this log entry.", preferredStyle: .alert)
+            enterTag.addTextField{ (textField) in
+                textField.text = ""
+            }
+            enterTag.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
+                let textField = enterTag.textFields![0] //unwrap
+                //access text with textField.text...now have Logger library take over
+                
+            }))
+            self.present(enterTag,animated:true,completion:nil)
+        }
+        let noAction = UIAlertAction(title:"No", style: .destructive){ (alert: UIAlertAction!) -> Void in
+            // do nothing
+        }
+        logPrompt.addAction(yesAction)
+        logPrompt.addAction(noAction)
+        present(logPrompt,animated:true,completion:nil)
     }
     
     override func viewDidLoad() {
