@@ -78,7 +78,7 @@ class ViewController: UIViewController, ChartViewDelegate {
             enterTag.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
                 let textField = enterTag.textFields![0] //unwrap
                 //access text with textField.text...now have Logger library take over
-                
+                Logger.log(tag: textField.text!, impulse: [Float(4.0)], STI: Float(3.5))
             }))
             self.present(enterTag,animated:true,completion:nil)
         }
@@ -98,7 +98,7 @@ class ViewController: UIViewController, ChartViewDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         let height = UIScreen.main.fixedCoordinateSpace.bounds.height
         let width = UIScreen.main.fixedCoordinateSpace.bounds.width
-        
+        Logger.setup();
 
 //        RecordButton.frame.size = CGSize(width: 60, height: 60);
 //        RecordButton.center = CGPoint(x: width/2, y: height * 0.25)
