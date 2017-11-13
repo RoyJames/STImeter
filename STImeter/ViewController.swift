@@ -78,7 +78,7 @@ class ViewController: UIViewController, ChartViewDelegate {
             enterTag.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
                 let textField = enterTag.textFields![0] //unwrap
                 //access text with textField.text...now have Logger library take over
-                Logger.log(tag: textField.text!, impulse: [Float(4.0)], STI: Float(3.5))
+                Logger.log(tag: textField.text!, impulse: [4.0,4.5], STI: Float(3.5))
             }))
             self.present(enterTag,animated:true,completion:nil)
         }

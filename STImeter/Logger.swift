@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+extension String {
+    /// Returns substring starting from given numeric index to the end of the string.
+    func substring(fromNumericIndex numericIndex: Int) -> String {
+        return self.substring(from: self.index(self.startIndex, offsetBy: numericIndex))
+    }
+}
+
 final class Logger{
     static var dateFormat = "yyyy-MM-dd hh:mm:ssSSS"
     static var dateFormatter: DateFormatter{
@@ -18,6 +25,7 @@ final class Logger{
         formatter.timeZone = TimeZone.current
         return formatter
     }
+    
     
     static var home : NSURL?
     static var logsPath :URL?
@@ -36,7 +44,6 @@ final class Logger{
     
     class func log(tag: String, impulse: [Float], STI: Float){
         let targetPath = logsPath!.appendingPathComponent(tag)
-        let message = "hello world \n"
         if(FileManager.default.fileExists(atPath: targetPath.path)){
             NSLog("itExists")
         }
@@ -44,27 +51,87 @@ final class Logger{
             NSLog("itDoesn'tExist")
             NSLog("creating \(tag): \(FileManager.default.createFile(atPath: targetPath.path, contents: nil, attributes: nil))")
         }
-        do{
-            try message.write(to: targetPath,atomically: true, encoding: .utf8)
+        if let fileHandle = FileHandle(forWritingAtPath: targetPath.path) {
+            defer{
+                fileHandle.closeFile()
+            }
+            var message = ""
+            var i = 1
+            message.append(String(format: "%f", impulse[0]))
+            while i < impulse.count {
+                NSLog("hit")
+                message.append(" \(String(format:"%f", impulse[i]))")
+                i = i + 1
+            }
+            message.append(" --->" + String(format:"%f", STI) + "\n")
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(message.data(using: String.Encoding.utf8)!)
         }
-        catch{NSLog("error writing to file")}
-        readLog(tag: tag) //for testing
+        else {
+            NSLog("Can't open fileHandle")
+        }
     }
     
     class func readLog(tag:String) -> (impulses: [[Float]]?, STIs: [Float]?){
         let targetPath = logsPath!.appendingPathComponent(tag)
+        var impulses: [[Float]]? = nil
+        var STIs: [Float]? = nil
         if(FileManager.default.fileExists(atPath: targetPath.path)){
             do{
-            let text = try String(contentsOf: targetPath,encoding: .utf8)
+            impulses = [[Float]]()
+            STIs=[]
+            let text = try String(contentsOf: targetPath,encoding: .utf8) //read in text
             NSLog("Here is the text: "+text)
+                //now load impulses and STIs
+                let lines: [String] = text.components(separatedBy: "\n")
+                var i=0
+                while i < lines.count-1{ //we don't count last empty line
+                    var j=0
+                    impulses!.append([])
+                    var entries: [String] = lines[i].components(separatedBy: " ")
+                    while j < entries.count-1{//handling STI value outside of loop
+                        //load float value
+                        impulses![i].append((entries[j] as NSString).floatValue)
+                       j = j+1
+                    }
+                    //load STI value
+                    STIs!.append((entries[j].substring(fromNumericIndex: 4) as NSString).floatValue)
+                    i=i+1
+                }
             }
             catch{NSLog("Error reading from file")}
         }
         else{
             NSLog("trying to read a log file that does not exist")
-            return (nil,nil)
         }
-        return (nil,nil)
+        return (impulses,STIs)
+    }
+    
+    class func clearAllLogs(){
+        do{
+        let files = try FileManager.default.contentsOfDirectory(atPath: logsPath!.path)
+      
+        for file in files{
+            clearLog(tag:file)
+        }
+        }
+        catch {
+            NSLog("failed to delete all log files")
+            return
+        }
+    }
+    
+    class func clearLog(tag: String){
+        let targetPath = logsPath!.appendingPathComponent(tag)
+        if(FileManager.default.fileExists(atPath: targetPath.path)){
+            do{
+                try NSLog("deleting \(tag): \(FileManager.default.removeItem(atPath:targetPath.path))")
+            }
+            catch {NSLog("Error deleing \(tag)")}
+        }
+        else{
+            NSLog("File does not exist...taking no action")
+        }
     }
     
 
