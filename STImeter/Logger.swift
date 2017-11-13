@@ -36,6 +36,7 @@ final class Logger{
     
     class func log(tag: String, impulse: [Float], STI: Float){
         let targetPath = logsPath!.appendingPathComponent(tag)
+        let message = "hello world \n"
         if(FileManager.default.fileExists(atPath: targetPath.path)){
             NSLog("itExists")
         }
@@ -43,7 +44,27 @@ final class Logger{
             NSLog("itDoesn'tExist")
             NSLog("creating \(tag): \(FileManager.default.createFile(atPath: targetPath.path, contents: nil, attributes: nil))")
         }
-        //actually write to file
+        do{
+            try message.write(to: targetPath,atomically: true, encoding: .utf8)
+        }
+        catch{NSLog("error writing to file")}
+        readLog(tag: tag) //for testing
+    }
+    
+    class func readLog(tag:String) -> (impulses: [[Float]]?, STIs: [Float]?){
+        let targetPath = logsPath!.appendingPathComponent(tag)
+        if(FileManager.default.fileExists(atPath: targetPath.path)){
+            do{
+            let text = try String(contentsOf: targetPath,encoding: .utf8)
+            NSLog("Here is the text: "+text)
+            }
+            catch{NSLog("Error reading from file")}
+        }
+        else{
+            NSLog("trying to read a log file that does not exist")
+            return (nil,nil)
+        }
+        return (nil,nil)
     }
     
 

@@ -90,6 +90,7 @@ class ViewController: UIViewController, ChartViewDelegate {
         present(logPrompt,animated:true,completion:nil)
     }
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         IRPlot.delegate = self
