@@ -24,10 +24,13 @@ class ViewController: UIViewController, ChartViewDelegate {
         if MyRecorder.isRecording {
             MyRecorder.stopRecording()
             var LineDataEntry: [ChartDataEntry] = []
-            let drawSample = 1000
-            let spacing = MyRecorder.MonoBuffer.count / 1000
+            let drawSample = 2000
+            let spacing = MyRecorder.MonoBuffer.count / drawSample
+
             for i in 0..<drawSample{
-                let dataPoint = ChartDataEntry(x: Double(i), y: Double(MyRecorder.MonoBuffer[i * spacing]))
+                let dataPoint = ChartDataEntry(x: Double(i), y: MyRecorder.MonoBuffer[i * spacing])
+//                let dataPoint = ChartDataEntry(x: Double(i), y: spectrum[i * spacing])
+//                let dataPoint = ChartDataEntry(x: Double(i), y: recover[i * spacing])
                 LineDataEntry.append(dataPoint)
             }
             let chartDataset = LineChartDataSet(values: LineDataEntry, label: "IR")
@@ -39,15 +42,16 @@ class ViewController: UIViewController, ChartViewDelegate {
             let chartData = LineChartData()
             chartData.addDataSet(chartDataset)
             IRPlot.data = chartData
-            IRPlot.setVisibleYRange(minYRange: chartDataset.yMin, maxYRange: chartDataset.yMax, axis: chartDataset.axisDependency)
+//            IRPlot.setVisibleYRange(minYRange: chartDataset.yMin, maxYRange: chartDataset.yMax, axis: chartDataset.axisDependency)
+            IRPlot.setVisibleYRange(minYRange: -1.0, maxYRange: 1.0, axis: chartDataset.axisDependency)
             IRPlot.setVisibleXRange(minXRange: chartDataset.xMin, maxXRange: chartDataset.xMax)
             IRPlot.drawGridBackgroundEnabled = false
-            IRPlot.xAxis.drawAxisLineEnabled = false
-            IRPlot.xAxis.drawGridLinesEnabled = false
+            IRPlot.xAxis.drawAxisLineEnabled = true
+            IRPlot.xAxis.drawGridLinesEnabled = true
             IRPlot.xAxis.drawLabelsEnabled = false
-            IRPlot.drawBordersEnabled = false
-            IRPlot.leftAxis.enabled = false
-            IRPlot.rightAxis.enabled = false
+            IRPlot.drawBordersEnabled = true
+            IRPlot.leftAxis.enabled = true
+            IRPlot.rightAxis.enabled = true
             IRPlot.legend.enabled = false
             IRPlot.chartDescription?.text = "Impulse Response"
 //            IRPlot.xAxis.labelCount = MyRecorder.MonoBuffer.count
@@ -55,9 +59,9 @@ class ViewController: UIViewController, ChartViewDelegate {
             IRPlot.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
 //            IRPlot.reloadInputViews()
             
-//            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: Int(MyRecorder.sampleRate))
-//            STIDisplayLabel.text = NSString(format: "STI: %f" , result) as String
-            STIDisplayLabel.text = "Record end"
+            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: Int(MyRecorder.sampleRate))
+            STIDisplayLabel.text = NSString(format: "STI: %f" , result) as String
+//            STIDisplayLabel.text = "Record end"
             // now log the output if user wishes
             if(LoggingSwitch.isOn){
                 handleLogging()
@@ -100,7 +104,7 @@ class ViewController: UIViewController, ChartViewDelegate {
         let height = UIScreen.main.fixedCoordinateSpace.bounds.height
         let width = UIScreen.main.fixedCoordinateSpace.bounds.width
         Logger.setup();
-
+        
 //        RecordButton.frame.size = CGSize(width: 60, height: 60);
 //        RecordButton.center = CGPoint(x: width/2, y: height * 0.25)
 //        

@@ -31,7 +31,7 @@ final class RecordAudio: NSObject {
     let circBuffSize = 32768        // lock-free circular fifo/buffer size
 //    var circBuffer   = [Float](repeating: 0, count: 32768)  // for incoming samples
 //    var circInIdx  : Int =  0
-    var MonoBuffer = [Float]()
+    var MonoBuffer = [Double]()
     var audioLevel : Float  = 0.0
     
     private var hwSRate = 48000.0   // guess of device hardware sample rate
@@ -40,9 +40,10 @@ final class RecordAudio: NSObject {
 
     func startRecording() {
         if isRecording { return }
-
+        
         startAudioSession()
         if sessionActive {
+            MonoBuffer.removeAll()
             startAudioUnit()
         }
     }
@@ -250,14 +251,14 @@ final class RecordAudio: NSObject {
             var sum : Float = 0.0
 //            var j = self.circInIdx
 //            let m = self.circBuffSize
-            var newdata: [Float] = Array(repeating: 0, count: count/2)
+            var newdata: [Double] = Array(repeating: 0, count: count/2)
             for i in 0..<(count/2) {
                 let x = Float(dataArray[i+i  ])   // copy left  channel sample
                 let y = Float(dataArray[i+i+1])   // copy right channel sample
 //                self.circBuffer[j    ] = x
 //                self.circBuffer[j + 1] = y
 //                j += 2 ; if j >= m { j = 0 }                // into circular buffer
-                newdata[i] = (x + y) / 2.0
+                newdata[i] = Double(x + y) / 2.0
                 sum += x * x + y * y
             }
             MonoBuffer += newdata
