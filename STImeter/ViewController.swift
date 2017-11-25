@@ -29,8 +29,6 @@ class ViewController: UIViewController, ChartViewDelegate {
 
             for i in 0..<drawSample{
                 let dataPoint = ChartDataEntry(x: Double(i), y: MyRecorder.MonoBuffer[i * spacing])
-//                let dataPoint = ChartDataEntry(x: Double(i), y: spectrum[i * spacing])
-//                let dataPoint = ChartDataEntry(x: Double(i), y: recover[i * spacing])
                 LineDataEntry.append(dataPoint)
             }
             let chartDataset = LineChartDataSet(values: LineDataEntry, label: "IR")
@@ -59,8 +57,8 @@ class ViewController: UIViewController, ChartViewDelegate {
             IRPlot.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
 //            IRPlot.reloadInputViews()
             
-            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: Int(MyRecorder.sampleRate))
-            STIDisplayLabel.text = NSString(format: "STI: %f" , result) as String
+            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: MyRecorder.sampleRate)
+            STIDisplayLabel.text = NSString(format: "STI: %.2f" , result) as String
 //            STIDisplayLabel.text = "Record end"
             // now log the output if user wishes
             if(LoggingSwitch.isOn){
@@ -111,6 +109,19 @@ class ViewController: UIViewController, ChartViewDelegate {
 //        let imageSize:CGSize = CGSize(width: width * 0.2, height: width * 0.2)
 //        RecordButton.imageView?.contentMode = .scaleAspectFit
 //        RecordButton.imageEdgeInsets = UIEdgeInsetsMake(RecordButton.frame.size.height/2 - imageSize.height/2, RecordButton.frame.size.width/2 - imageSize.width/2, RecordButton.frame.size.height/2 - imageSize.height/2, RecordButton.frame.size.width/2 - imageSize.width/2)
+
+        // testing IR calculation
+//        guard let path = Bundle.main.path(forResource: "HATS_20m_RIR", ofType:"wav") else {
+//            debugPrint("IR not found")
+//            return
+//        }
+//        let url = NSURL.fileURL(withPath: path)
+//        let (sig, rate, length) = loadAudioSignal(audioURL: url)
+//        var cvtsig: [Double] = Array(repeating: 0, count: length)
+//        for i in 0...(length-1){
+//            cvtsig[i] = Double(sig[i])
+//        }
+//        let sti = IR2STI(IR: cvtsig, sampleRate: rate)
     }
 
     
@@ -122,3 +133,11 @@ class ViewController: UIViewController, ChartViewDelegate {
 
 }
 
+func loadAudioSignal(audioURL: URL) -> (signal: [Float], rate: Double, frameCount: Int) {
+    let file = try! AVAudioFile(forReading: audioURL)
+    let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: file.fileFormat.sampleRate, channels: file.fileFormat.channelCount, interleaved: false)
+    let buf = AVAudioPCMBuffer(pcmFormat: format!, frameCapacity: UInt32(file.length))
+    try! file.read(into: buf!) // You probably want better error handling
+    let floatArray = Array(UnsafeBufferPointer(start: buf!.floatChannelData![0], count:Int(buf!.frameLength)))
+    return (signal: floatArray, rate: file.fileFormat.sampleRate, frameCount: Int(file.length))
+}

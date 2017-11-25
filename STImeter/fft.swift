@@ -5,6 +5,7 @@
 //  Created by Christopher Helf on 17.08.15.
 //  Copyright (c) 2015-Present Christopher Helf. All rights reserved.
 //  Adapted From https://gerrybeauregard.wordpress.com/2013/01/28/using-apples-vdspaccelerate-fft/
+//  Modified by Zhenyu Tang on Nov 24, 2017
 
 import Foundation
 import Accelerate
