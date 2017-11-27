@@ -40,16 +40,19 @@ class ViewController: UIViewController, ChartViewDelegate {
             let chartData = LineChartData()
             chartData.addDataSet(chartDataset)
             IRPlot.data = chartData
-//            IRPlot.setVisibleYRange(minYRange: chartDataset.yMin, maxYRange: chartDataset.yMax, axis: chartDataset.axisDependency)
-            IRPlot.setVisibleYRange(minYRange: -1.0, maxYRange: 1.0, axis: chartDataset.axisDependency)
+//            IRPlot.setVisibleYRange(minYRange: min(-0.1, chartDataset.yMin), maxYRange: max(0.1, chartDataset.yMax), axis: chartDataset.axisDependency)
+//            IRPlot.setVisibleYRange(minYRange: -1.0, maxYRange: 1.0, axis: chartDataset.axisDependency)
+            IRPlot.leftAxis.axisMinimum = min(-1.2, chartDataset.yMin)
+            IRPlot.leftAxis.axisMaximum = max(1.2, chartDataset.yMax)
             IRPlot.setVisibleXRange(minXRange: chartDataset.xMin, maxXRange: chartDataset.xMax)
+            IRPlot.notifyDataSetChanged()
             IRPlot.drawGridBackgroundEnabled = false
             IRPlot.xAxis.drawAxisLineEnabled = true
             IRPlot.xAxis.drawGridLinesEnabled = true
             IRPlot.xAxis.drawLabelsEnabled = false
             IRPlot.drawBordersEnabled = true
             IRPlot.leftAxis.enabled = true
-            IRPlot.rightAxis.enabled = true
+            IRPlot.rightAxis.enabled = false
             IRPlot.legend.enabled = false
             IRPlot.chartDescription?.text = "Impulse Response"
 //            IRPlot.xAxis.labelCount = MyRecorder.MonoBuffer.count
@@ -102,7 +105,7 @@ class ViewController: UIViewController, ChartViewDelegate {
         let height = UIScreen.main.fixedCoordinateSpace.bounds.height
         let width = UIScreen.main.fixedCoordinateSpace.bounds.width
         Logger.setup();
-        
+
 //        RecordButton.frame.size = CGSize(width: 60, height: 60);
 //        RecordButton.center = CGPoint(x: width/2, y: height * 0.25)
 //        
