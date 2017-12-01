@@ -83,7 +83,20 @@ class ViewController: UIViewController, ChartViewDelegate {
             enterTag.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
                 let textField = enterTag.textFields![0] //unwrap
                 //access text with textField.text...now have Logger library take over
-                Logger.log(tag: textField.text!, impulse: [4.0,4.5], STI: Float(3.5))
+                if(Logger.listFiles().contains(textField.text!)){
+                    let duplicate = UIAlertController(title: "Overwrite?", message: "We found an entry for this tag already. Would you like to overwrite?", preferredStyle: .alert)
+                    let ok = UIAlertAction(title:"Yes", style:.destructive){ (alert: UIAlertAction!) -> Void in
+                        Logger.clearLog(tag: textField.text!)
+                        Logger.log(tag: textField.text!, impulse: [4.0,4.5], STI: Float(3.5))
+                    }
+                    let no = UIAlertAction(title:"No", style:.destructive){ (alert: UIAlertAction!) -> Void in
+                        //do nothing
+                    }
+                    duplicate.addAction(ok)
+                    duplicate.addAction(no)
+                    self.present(duplicate,animated:true,completion:nil)
+                }
+                else {Logger.log(tag: textField.text!, impulse: [4.0,4.5], STI: Float(3.5))}
             }))
             self.present(enterTag,animated:true,completion:nil)
         }

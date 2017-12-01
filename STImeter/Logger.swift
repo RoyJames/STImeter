@@ -107,6 +107,17 @@ final class Logger{
         return (impulses,STIs)
     }
     
+    class func listFiles() -> [String]{
+        do{
+            return try FileManager.default.contentsOfDirectory(atPath: logsPath!.path)
+            
+        }
+        catch {
+            NSLog("Failed to get log directory contents.")
+            return []
+        }
+    }
+    
     class func clearAllLogs(){
         do{
         let files = try FileManager.default.contentsOfDirectory(atPath: logsPath!.path)
@@ -133,7 +144,6 @@ final class Logger{
             NSLog("File does not exist...taking no action")
         }
     }
-    
 
     
     
