@@ -52,6 +52,76 @@ class FFT {
         
         return (bandPassFilter, minIdx, maxIdx)
     }
+ 
+    
+    func forwardTransf(_ _values: [Double], fps: Double) {
+        // ----------------------------------------------------------------
+        // Copy of our input
+        // ----------------------------------------------------------------
+        var values = _values
+        
+        // ----------------------------------------------------------------
+        // Size Variables
+        // ----------------------------------------------------------------
+        let N = values.count
+        let N2 = vDSP_Length(N/2)
+        let LOG_N = vDSP_Length(log2(Float(values.count)))
+        
+        // ----------------------------------------------------------------
+        // FFT & Variables Setup
+        // ----------------------------------------------------------------
+        let fftSetup: FFTSetupD = vDSP_create_fftsetupD(LOG_N, FFTRadix(kFFTRadix2))!
+        
+        var tempSplitComplexReal : [Double] = [Double](repeating: 0.0, count: N/2)
+        var tempSplitComplexImag : [Double] = [Double](repeating: 0.0, count: N/2)
+        var tempSplitComplex : DSPDoubleSplitComplex = DSPDoubleSplitComplex(realp: &tempSplitComplexReal, imagp: &tempSplitComplexImag)
+        
+        // For polar coordinates
+        freqMag = [Double](repeating: 0.0, count: N/2)
+        freqPhase = [Double](repeating: 0.0, count: N/2)
+        
+        // ----------------------------------------------------------------
+        // Forward FFT
+        // ----------------------------------------------------------------
+        
+        var valuesAsComplex : UnsafeMutablePointer<DSPDoubleComplex>? = nil
+        
+        values.withUnsafeMutableBytes {
+            valuesAsComplex = $0.baseAddress?.bindMemory(to: DSPDoubleComplex.self, capacity: values.count)
+        }
+        
+        // Scramble-pack the real data into complex buffer in just the way that's
+        // required by the real-to-complex FFT function that follows.
+        vDSP_ctozD(valuesAsComplex!, 2, &tempSplitComplex, 1, N2);
+        
+        // Do real->complex forward FFT
+        vDSP_fft_zripD(fftSetup, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_FORWARD));
+        
+        // ----------------------------------------------------------------
+        // Get the Frequency Spectrum
+        // ----------------------------------------------------------------
+        
+        var fftMagnitudes = [Double](repeating: 0.0, count: N/2)
+        vDSP_zvmagsD(&tempSplitComplex, 1, &fftMagnitudes, 1, N2);
+        
+        // vDSP_zvmagsD returns squares of the FFT magnitudes, so take the root here
+        let roots = sqrt(fftMagnitudes)
+        
+        // Normalize the Amplitudes
+        var fullSpectrum = [Double](repeating: 0.0, count: N/2)
+        vDSP_vsmulD(roots, vDSP_Stride(1), [1.0 / Double(N)], &fullSpectrum, 1, N2)
+        
+        // ----------------------------------------------------------------
+        // Convert from complex/rectangular (real, imaginary) coordinates
+        // to polar (magnitude and phase) coordinates.
+        // ----------------------------------------------------------------
+        
+        vDSP_zvabsD(&tempSplitComplex, 1, &freqMag, 1, N2);
+        
+        // Beware: Outputted phase here between -PI and +PI
+        // https://developer.apple.com/library/prerelease/ios/documentation/Accelerate/Reference/vDSPRef/index.html#//apple_ref/c/func/vDSP_zvphasD
+        vDSP_zvphasD(&tempSplitComplex, 1, &freqPhase, 1, N2);
+    }
     
     func calculate(_ _values: [Double], fps: Double, cutlow: Double, cuthigh: Double)->[Double] {
         // ----------------------------------------------------------------
@@ -201,12 +271,15 @@ class FFT {
         return scaled_result
     }
     
+    
+    
     // The bandpass frequencies
     var lowerFreq : Double = 0
     var higherFreq: Double = -1
     
     // Intermediate results
-    
+    var freqMag : [Double] = []
+    var freqPhase : [Double] = []
     
     // Some Math functions on Arrays
     func mul(_ x: [Double], y: [Double]) -> [Double] {
