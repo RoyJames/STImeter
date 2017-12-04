@@ -52,6 +52,7 @@
                     <tabBarItem key="tabBarItem" title="Log" id="y7a-fP-8hz"/>
                     <connections>
                         <outlet property="tableView" destination="mJI-VN-wA2" id="aTa-8d-Gcb"/>
+                        <segue destination="BYZ-38-t0r" kind="show" id="ahR-RV-3L0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hUl-UT-FvV" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -200,4 +201,7 @@
     <resources>
         <image name="RecordButton" width="1024" height="1024"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="ahR-RV-3L0"/>
+    </inferredMetricsTieBreakers>
 </document>

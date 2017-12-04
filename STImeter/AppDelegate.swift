@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  STImeter
 //
-//  Created by Roy James on 10/9/17.
+//  Created by Zhenyu Tang on 10/9/17.
 //  Copyright © 2017 UNC. All rights reserved.
 //
 

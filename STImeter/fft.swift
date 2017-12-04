@@ -10,9 +10,6 @@
 import Foundation
 import Accelerate
 
-// @todo: adapt this code so that filtering and fft are separate process
-// @todo: add data padding utility
-
 class FFT {
     
     fileprivate func getFrequencies(_ N: Int, fps: Double) -> [Double] {
@@ -70,7 +67,7 @@ class FFT {
         // ----------------------------------------------------------------
         // FFT & Variables Setup
         // ----------------------------------------------------------------
-        let fftSetup: FFTSetupD = vDSP_create_fftsetupD(LOG_N, FFTRadix(kFFTRadix2))!
+        fftSetup = vDSP_create_fftsetupD(LOG_N, FFTRadix(kFFTRadix2))!
         
         var tempSplitComplexReal : [Double] = [Double](repeating: 0.0, count: N/2)
         var tempSplitComplexImag : [Double] = [Double](repeating: 0.0, count: N/2)
@@ -95,7 +92,7 @@ class FFT {
         vDSP_ctozD(valuesAsComplex!, 2, &tempSplitComplex, 1, N2);
         
         // Do real->complex forward FFT
-        vDSP_fft_zripD(fftSetup, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_FORWARD));
+        vDSP_fft_zripD(fftSetup!, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_FORWARD));
         
         // ----------------------------------------------------------------
         // Get the Frequency Spectrum
@@ -123,6 +120,62 @@ class FFT {
         vDSP_zvphasD(&tempSplitComplex, 1, &freqPhase, 1, N2);
     }
     
+    func getfiltered(rate: Double, cutlow: Double, cuthigh: Double)->[Double] {
+        let N = freqMag.count * 2
+        let N2 = vDSP_Length(N/2)
+        let LOG_N = vDSP_Length(log2(Float(N)))
+        var tempComplex : [DSPDoubleComplex] = [DSPDoubleComplex](repeating: DSPDoubleComplex(), count: N/2)
+
+        // Set cutoff frequencies
+        self.lowerFreq = cutlow
+        self.higherFreq = cuthigh
+        // Get the Frequencies for the current Framerate
+        let freqs = getFrequencies(N, fps: rate)
+        // Get a Bandpass Filter
+        let bandPassFilter = generateBandPassFilter(freqs)
+        
+        // Multiply phase and magnitude with the bandpass filter
+        var mag = mul(freqMag, y: bandPassFilter.0)
+        var phase = mul(freqPhase, y: bandPassFilter.0)
+
+        var tempSplitComplex = DSPDoubleSplitComplex(realp: &mag, imagp: &phase)
+        
+        var complexAsValue : UnsafeMutablePointer<Double>? = nil
+        
+        tempComplex.withUnsafeMutableBytes {
+            complexAsValue = $0.baseAddress?.bindMemory(to: Double.self, capacity: N)
+        }
+        
+        vDSP_ztocD(&tempSplitComplex, 1, &tempComplex, 2, N2);
+        vDSP_rectD(complexAsValue!, 2, complexAsValue!, 2, N2);
+        vDSP_ctozD(&tempComplex, 2, &tempSplitComplex, 1, N2);
+        
+        // ----------------------------------------------------------------
+        // Do Inverse FFT
+        // ----------------------------------------------------------------
+        
+        // Create result
+        var result : [Double] = [Double](repeating: 0.0, count: N)
+        var scaled_result : [Double] = [Double](repeating: 0.0, count: N)
+        var resultAsComplex : UnsafeMutablePointer<DSPDoubleComplex>? = nil
+        
+        result.withUnsafeMutableBytes {
+            resultAsComplex = $0.baseAddress?.bindMemory(to: DSPDoubleComplex.self, capacity: N)
+        }
+        
+        // Do complex->real inverse FFT.
+        vDSP_fft_zripD(fftSetup!, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_INVERSE));
+        
+        // This leaves result in packed format. Here we unpack it into a real vector.
+        vDSP_ztocD(&tempSplitComplex, 1, resultAsComplex!, 2, N2);
+        
+        // Neither the forward nor inverse FFT does any scaling. Here we compensate for that.
+        var scale : Double = 0.5/Double(N);
+        vDSP_vsmulD(&result, 1, &scale, &scaled_result, 1, vDSP_Length(N));
+
+        return scaled_result
+    }
+    
     func calculate(_ _values: [Double], fps: Double, cutlow: Double, cuthigh: Double)->[Double] {
         // ----------------------------------------------------------------
         // Copy of our input
@@ -139,7 +192,7 @@ class FFT {
         // ----------------------------------------------------------------
         // FFT & Variables Setup
         // ----------------------------------------------------------------
-        let fftSetup: FFTSetupD = vDSP_create_fftsetupD(LOG_N, FFTRadix(kFFTRadix2))!
+        fftSetup = vDSP_create_fftsetupD(LOG_N, FFTRadix(kFFTRadix2))!
         
         // We need complex buffers in two different formats!
         var tempComplex : [DSPDoubleComplex] = [DSPDoubleComplex](repeating: DSPDoubleComplex(), count: N/2)
@@ -167,7 +220,7 @@ class FFT {
         vDSP_ctozD(valuesAsComplex!, 2, &tempSplitComplex, 1, N2);
         
         // Do real->complex forward FFT
-        vDSP_fft_zripD(fftSetup, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_FORWARD));
+        vDSP_fft_zripD(fftSetup!, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_FORWARD));
         
         // ----------------------------------------------------------------
         // Get the Frequency Spectrum
@@ -254,7 +307,7 @@ class FFT {
         }
 
         // Do complex->real inverse FFT.
-        vDSP_fft_zripD(fftSetup, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_INVERSE));
+        vDSP_fft_zripD(fftSetup!, &tempSplitComplex, 1, LOG_N, FFTDirection(FFT_INVERSE));
         
         // This leaves result in packed format. Here we unpack it into a real vector.
         vDSP_ztocD(&tempSplitComplex, 1, resultAsComplex!, 2, N2);
@@ -280,6 +333,8 @@ class FFT {
     // Intermediate results
     var freqMag : [Double] = []
     var freqPhase : [Double] = []
+    
+    var fftSetup: FFTSetupD?
     
     // Some Math functions on Arrays
     func mul(_ x: [Double], y: [Double]) -> [Double] {

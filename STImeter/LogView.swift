@@ -2,17 +2,21 @@
 //  ViewController.swift
 //  STImeter
 //
-//  Created by Roy James on 10/9/17.
+//  Created by Maxwell Henry Daum and Zhenyu Tang on 10/9/17.
 //  Copyright © 2017 UNC. All rights reserved.
 //
 
 import UIKit
 import AVFoundation
 
+protocol LogViewDelegate : class {
+    func loadLog(filename : String?)
+}
 
 class LogView: UIViewController,UITableViewDelegate,UITableViewDataSource  {
     
     @IBOutlet weak var tableView: UITableView!
+    weak var delegate: LogViewDelegate?
     
     var datasource:[String] = ["dummy"]
     override func viewDidLoad() {
@@ -51,31 +55,24 @@ class LogView: UIViewController,UITableViewDelegate,UITableViewDataSource  {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = datasource[indexPath.row]
-        print(item)
+        delegate?.loadLog(filename: item)
+        self.tabBarController?.selectedIndex = 0
     }
     
-    @available(iOS 11.0, *)
-    func tableView(_ tableView: UITableView,
-                   leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
-    {
-        let closeAction = UIContextualAction(style: .normal, title:  "Close", handler: { (ac:UIContextualAction, view:UIView, success:(Bool) -> Void) in
-            print("OK, marked as Closed")
-            //example delete
-            // Logger.clearLog(tag:)
-            success(true)
-        })
-        //    closeAction.image = UIImage(named: "tick")
-        closeAction.backgroundColor = .purple
-        
-        return UISwipeActionsConfiguration(actions: [closeAction])
-    }
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true }
     
     @available(iOS 11.0, *)
     func tableView(_ tableView: UITableView,
                    trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
     {
-        let modifyAction = UIContextualAction(style: .normal, title:  "Update", handler: { (ac:UIContextualAction, view:UIView, success:(Bool) -> Void) in
-            print("Update action ...")
+        let modifyAction = UIContextualAction(style: .normal, title:  "Delete", handler: { (ac:UIContextualAction, view:UIView, success:(Bool) -> Void) in
+            let item = self.datasource[indexPath.row]
+            Logger.clearLog(tag: item)
+            tableView.beginUpdates()
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            self.datasource.remove(at: indexPath.row)
+            tableView.endUpdates()
             success(true)
         })
         //    modifyAction.image = UIImage(named: "hammer")

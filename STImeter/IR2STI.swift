@@ -1,3 +1,11 @@
+//  IR2STI.swift
+//  STImeter
+//
+//  Created by Maxwell Henry Daum and Zhenyu Tang on 11/7/17.
+//  Copyright © 2017 UNC. All rights reserved.
+//
+
+
 import Foundation
 // https://www.prosoundtraining.com/2010/03/17/a-do-it-yourselfers-guide-to-computing-the-speech-transmission-index/
 
@@ -23,9 +31,11 @@ func IR2STI (IR: [Double], sampleRate: Double) -> Double{
     let STI_weights: [Double] = [0.13,0.14,0.11,0.12,0.19,0.17,0.14]
 //    let IRLenth: Int = IR.count + PaddingLength
     let paddedIR: [Double] = Array(repeating: 0, count: PaddingLength) + IR
+    fft.forwardTransf(padpower2(paddedIR), fps: sampleRate)
     for i in 0...6{
         //FFT based band-pass filter
-        var P_octave = fft.calculate(padpower2(paddedIR), fps: sampleRate, cutlow: f_low[i], cuthigh: f_high[i])
+//        var P_octave = fft.calculate(padpower2(paddedIR), fps: sampleRate, cutlow: f_low[i], cuthigh: f_high[i])
+        var P_octave = fft.getfiltered(rate: sampleRate, cutlow: f_low[i], cuthigh: f_high[i])
         //P_octave is now the filtered paddedIR, we square each elem to convert to power envelope
         P_octave = P_octave.map({$0 * $0})
         for j in 0...13{

@@ -2,7 +2,7 @@
 //  Logger.swift
 //  STImeter
 //
-//  Created by Roy James on 11/7/17.
+//  Created by Maxwell Henry Daum on 11/7/17.
 //  Copyright © 2017 UNC. All rights reserved.
 //
 
@@ -42,7 +42,7 @@ final class Logger{
         }
     }
     
-    class func log(tag: String, impulse: [Float], STI: Float){
+    class func log(tag: String, impulse: [Double], STI: Double){
         let targetPath = logsPath!.appendingPathComponent(tag)
         if(FileManager.default.fileExists(atPath: targetPath.path)){
             NSLog("itExists")
@@ -72,13 +72,13 @@ final class Logger{
         }
     }
     
-    class func readLog(tag:String) -> (impulses: [[Float]]?, STIs: [Float]?){
+    class func readLog(tag:String) -> (impulses: [[Double]]?, STIs: [Double]?){
         let targetPath = logsPath!.appendingPathComponent(tag)
-        var impulses: [[Float]]? = nil
-        var STIs: [Float]? = nil
+        var impulses: [[Double]]? = nil
+        var STIs: [Double]? = nil
         if(FileManager.default.fileExists(atPath: targetPath.path)){
             do{
-            impulses = [[Float]]()
+            impulses = [[Double]]()
             STIs=[]
             let text = try String(contentsOf: targetPath,encoding: .utf8) //read in text
             NSLog("Here is the text: "+text)
@@ -91,11 +91,11 @@ final class Logger{
                     var entries: [String] = lines[i].components(separatedBy: " ")
                     while j < entries.count-1{//handling STI value outside of loop
                         //load float value
-                        impulses![i].append((entries[j] as NSString).floatValue)
+                        impulses![i].append((entries[j] as NSString).doubleValue)
                        j = j+1
                     }
                     //load STI value
-                    STIs!.append((entries[j].substring(fromNumericIndex: 4) as NSString).floatValue)
+                    STIs!.append((entries[j].substring(fromNumericIndex: 4) as NSString).doubleValue)
                     i=i+1
                 }
             }
