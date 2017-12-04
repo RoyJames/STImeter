@@ -9,7 +9,7 @@
 import Foundation
 // https://www.prosoundtraining.com/2010/03/17/a-do-it-yourselfers-guide-to-computing-the-speech-transmission-index/
 
-func IR2STI (IR: [Double], sampleRate: Double) -> Double{
+func IR2STI (IR: inout [Double], sampleRate: Double) -> Double{
     let minLength = Int(1.6 * sampleRate)
     let PaddingLength = IR.count < minLength ? minLength - IR.count : Int(sampleRate) / 10 //add 100ms zero padding to the beginning
     var fc, f_low, f_high: [Double]
@@ -31,7 +31,8 @@ func IR2STI (IR: [Double], sampleRate: Double) -> Double{
     let STI_weights: [Double] = [0.13,0.14,0.11,0.12,0.19,0.17,0.14]
 //    let IRLenth: Int = IR.count + PaddingLength
     let paddedIR: [Double] = Array(repeating: 0, count: PaddingLength) + IR
-    fft.forwardTransf(padpower2(paddedIR), fps: sampleRate)
+    var padpower2IR = padpower2(paddedIR)
+    fft.forwardTransf(&padpower2IR, fps: sampleRate)
     for i in 0...6{
         //FFT based band-pass filter
 //        var P_octave = fft.calculate(padpower2(paddedIR), fps: sampleRate, cutlow: f_low[i], cuthigh: f_high[i])

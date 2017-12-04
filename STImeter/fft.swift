@@ -51,7 +51,7 @@ class FFT {
     }
  
     
-    func forwardTransf(_ _values: [Double], fps: Double) {
+    func forwardTransf(_ _values: inout [Double], fps: Double) {
         // ----------------------------------------------------------------
         // Copy of our input
         // ----------------------------------------------------------------

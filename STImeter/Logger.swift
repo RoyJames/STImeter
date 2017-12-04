@@ -26,13 +26,14 @@ final class Logger{
         return formatter
     }
     
-    
     static var home : NSURL?
     static var logsPath :URL?
+    static var now : Date?
     
     class func setup(){
         home = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
         logsPath = home!.appendingPathComponent("log")
+        now = Date.init()
         print(logsPath!)
         do {
             try FileManager.default.createDirectory(atPath: logsPath!.path, withIntermediateDirectories: true, attributes: nil)
@@ -109,12 +110,60 @@ final class Logger{
     
     class func listFiles() -> [String]{
         do{
-            return try FileManager.default.contentsOfDirectory(atPath: logsPath!.path)
             
+            let list = try FileManager.default.contentsOfDirectory(atPath: logsPath!.path)
+            var times = [String : Double]()
+            for s in list{
+                times[s]=fileModificationDate(url: (logsPath?.appendingPathComponent(s))!)?.timeIntervalSince(now!)
+            }
+            
+            return quickSort(newArray: list, dictionary: times)
         }
         catch {
             NSLog("Failed to get log directory contents.")
             return []
+        }
+    }
+    
+    class func quickSort(newArray: [String], dictionary: [String:Double])->Array<String> {
+        
+        // newArray is an array of Strings
+        
+        var less = [String]()
+        var equal = [String]()
+        var greater = [String]()
+        
+        if newArray.count > 1{
+            let pivot = dictionary[newArray[0]]
+            
+            for x in newArray {
+                let val = dictionary[x]
+                if val! < pivot!{
+                    less.append(x)
+                }
+                if val! == pivot! {
+                    equal.append(x)
+                }
+                if val! > pivot! {
+                    greater.append(x)
+                }
+            }
+            return (quickSort(newArray: less,dictionary: dictionary)+equal+quickSort(newArray: greater,dictionary: dictionary))
+            
+        }
+            
+        else {
+            return newArray
+        }
+        
+    }
+    
+    class func fileModificationDate(url: URL) -> Date? {
+        do {
+            let attr = try FileManager.default.attributesOfItem(atPath: url.path)
+            return attr[FileAttributeKey.modificationDate] as? Date
+        } catch {
+            return nil
         }
     }
     

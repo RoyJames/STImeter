@@ -31,7 +31,7 @@ class ViewController: UIViewController, ChartViewDelegate, LogViewDelegate {
             }
             updateGraph(samples: downsamples)
 
-            let result = IR2STI(IR: MyRecorder.MonoBuffer, sampleRate: MyRecorder.sampleRate)
+            let result = IR2STI(IR: &MyRecorder.MonoBuffer, sampleRate: MyRecorder.sampleRate)
             updateSTI(newSTI: result)
             
             // now log the output if user wishes
@@ -76,13 +76,13 @@ class ViewController: UIViewController, ChartViewDelegate, LogViewDelegate {
     }
     
     func handleLogging(impulse:[Double], STI: Double){
-        let logPrompt = UIAlertController(title: "Log?", message: "Would you like to log this result?", preferredStyle: .alert)
-        let yesAction = UIAlertAction(title:"Yes", style: .destructive){ (alert: UIAlertAction!) -> Void in
             let enterTag = UIAlertController(title: "Enter Tag", message: "Please enter a tag for this log entry.", preferredStyle: .alert)
             enterTag.addTextField{ (textField) in
-                textField.text = ""
+                textField.clearButtonMode = .always
+                let prefill = Date.init().description
+                textField.text=prefill.substring(to: prefill.index(prefill.startIndex,offsetBy: prefill.count - 5))
             }
-            enterTag.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
+        enterTag.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { (alert: UIAlertAction!) in
                 let textField = enterTag.textFields![0] //unwrap
                 //access text with textField.text...now have Logger library take over
                 if(Logger.listFiles().contains(textField.text!)){
@@ -100,14 +100,11 @@ class ViewController: UIViewController, ChartViewDelegate, LogViewDelegate {
                 }
                 else {Logger.log(tag: textField.text!, impulse: impulse, STI: STI)}
             }))
-            self.present(enterTag,animated:true,completion:nil)
-        }
-        let noAction = UIAlertAction(title:"No", style: .destructive){ (alert: UIAlertAction!) -> Void in
+        let noAction = UIAlertAction(title:"Cancel", style: .destructive){ (alert: UIAlertAction!) -> Void in
             // do nothing
         }
-        logPrompt.addAction(yesAction)
-        logPrompt.addAction(noAction)
-        present(logPrompt,animated:true,completion:nil)
+        enterTag.addAction(noAction)
+        present(enterTag,animated:true,completion:nil)
     }
     
     
