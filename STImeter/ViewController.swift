@@ -45,7 +45,20 @@ class ViewController: UIViewController, ChartViewDelegate, LogViewDelegate {
     }
 
     func updateSTI(newSTI: Double){
-        STIDisplayLabel.text = NSString(format: "STI: %.2f" , newSTI) as String
+        // STI qualification refers to wiki: https://en.wikipedia.org/wiki/Speech_transmission_index
+        var qualification : String
+        if newSTI < 0.3 {
+            qualification = "Bad"
+        }else if newSTI < 0.45 {
+            qualification = "Poor"
+        }else if newSTI < 0.6 {
+            qualification = "Fair"
+        }else if newSTI < 0.75 {
+            qualification = "Good"
+        }else {
+            qualification = "Excellent"
+        }
+        STIDisplayLabel.text = NSString(format: "STI: %.2f" , newSTI) as String + " (\(qualification))"
     }
     
     func updateGraph(samples: [Double]) {
@@ -113,7 +126,7 @@ class ViewController: UIViewController, ChartViewDelegate, LogViewDelegate {
         // Do any additional setup after loading the view, typically from a nib.
 
         IRPlot.delegate = self
-        IRPlot.noDataText = "IR will be drawn here"
+        IRPlot.noDataText = "Click record button to record an impulse sound.\nThe impulse will be drawn here."
         IRPlot.noDataTextColor = NSUIColor.blue
 //        IRPlot.setVisibleYRange(minYRange: min(-0.1, chartDataset.yMin), maxYRange: max(0.1, chartDataset.yMax), axis: chartDataset.axisDependency)
 //        IRPlot.setVisibleYRange(minYRange: -1.0, maxYRange: 1.0, axis: chartDataset.axisDependency)

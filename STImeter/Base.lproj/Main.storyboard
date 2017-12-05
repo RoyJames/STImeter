@@ -4,7 +4,6 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13770"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
@@ -49,7 +48,7 @@
                             <constraint firstAttribute="trailing" secondItem="mJI-VN-wA2" secondAttribute="trailing" id="qUD-bI-4Lg"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Log" id="y7a-fP-8hz"/>
+                    <tabBarItem key="tabBarItem" title="Log" image="Log" id="y7a-fP-8hz"/>
                     <connections>
                         <outlet property="tableView" destination="mJI-VN-wA2" id="aTa-8d-Gcb"/>
                         <segue destination="BYZ-38-t0r" kind="show" id="ahR-RV-3L0"/>
@@ -125,8 +124,8 @@
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="dfj-Zq-myC" userLabel="Plot Stack">
                                         <rect key="frame" x="0.0" y="209" width="375" height="379"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="STI display" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qg0-bn-xAK">
-                                                <rect key="frame" x="146" y="0.0" width="83.5" height="20.5"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="STI: 0 (no data)" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qg0-bn-xAK">
+                                                <rect key="frame" x="128.5" y="0.0" width="118.5" height="20.5"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" priority="100" constant="20.5" id="Jkc-KW-yUY"/>
                                                 </constraints>
@@ -164,7 +163,7 @@
                             <constraint firstItem="GaW-Xe-8Kq" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="30" id="zXg-cs-Oyc"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="STI" id="8gk-BH-L3b"/>
+                    <tabBarItem key="tabBarItem" title="STI" image="Speech" id="8gk-BH-L3b"/>
                     <connections>
                         <outlet property="IRPlot" destination="qlL-jc-P5y" id="HkQ-VZ-kB5"/>
                         <outlet property="LoggingLabel" destination="Qau-mg-TF1" id="2wj-7J-3SR"/>
@@ -199,9 +198,11 @@
         </scene>
     </scenes>
     <resources>
+        <image name="Log" width="26" height="26"/>
         <image name="RecordButton" width="1024" height="1024"/>
+        <image name="Speech" width="26" height="26"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="ahR-RV-3L0"/>
+        <segue reference="9D4-WX-3Pb"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -21,9 +21,9 @@ class FFT {
         return freqs
     }
     
-    fileprivate func generateBandPassFilter(_ freqs: [Double]) -> ([Double], Int, Int) {
-        var minIdx = freqs.count+1
-        var maxIdx = -1
+    fileprivate func generateBandPassFilter(_ freqs: [Double]) -> [Double] {
+//        var minIdx = freqs.count+1
+//        var maxIdx = -1
         
         let bandPassFilter: [Double] = freqs.map {
             if ($0 >= self.lowerFreq && $0 <= self.higherFreq) {
@@ -32,22 +32,22 @@ class FFT {
                 return 0.0
             }
         }
-        
-        for (i, element) in bandPassFilter.enumerated() {
-            if (element == 1.0) {
-                if(i<minIdx || minIdx == freqs.count+1) {
-                    minIdx=i
-                }
-                if(i>maxIdx || maxIdx == -1) {
-                    maxIdx=i
-                }
-            }
-        }
-        
-        assert(maxIdx != -1)
-        assert(minIdx != freqs.count+1)
-        
-        return (bandPassFilter, minIdx, maxIdx)
+        return bandPassFilter
+//        for (i, element) in bandPassFilter.enumerated() {
+//            if (element == 1.0) {
+//                if(i<minIdx || minIdx == freqs.count+1) {
+//                    minIdx=i
+//                }
+//                if(i>maxIdx || maxIdx == -1) {
+//                    maxIdx=i
+//                }
+//            }
+//        }
+//
+//        assert(maxIdx != -1)
+//        assert(minIdx != freqs.count+1)
+//
+//        return (bandPassFilter, minIdx, maxIdx)
     }
  
     
@@ -135,8 +135,8 @@ class FFT {
         let bandPassFilter = generateBandPassFilter(freqs)
         
         // Multiply phase and magnitude with the bandpass filter
-        var mag = mul(freqMag, y: bandPassFilter.0)
-        var phase = mul(freqPhase, y: bandPassFilter.0)
+        var mag = mul(freqMag, y: bandPassFilter)
+        var phase = mul(freqPhase, y: bandPassFilter)
 
         var tempSplitComplex = DSPDoubleSplitComplex(realp: &mag, imagp: &phase)
         
@@ -259,8 +259,8 @@ class FFT {
         let bandPassFilter = generateBandPassFilter(freqs)
 
         // Multiply phase and magnitude with the bandpass filter
-        mag = mul(mag, y: bandPassFilter.0)
-        phase = mul(phase, y: bandPassFilter.0)
+        mag = mul(mag, y: bandPassFilter)
+        phase = mul(phase, y: bandPassFilter)
 
         // Output Variables
 //        let filteredSpectrum = mul(fullSpectrum, y: bandPassFilter.0)
